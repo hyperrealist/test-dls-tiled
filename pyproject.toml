@@ -12,7 +12,11 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 description = "A test Tiled container with DLS-specific plugins"
-dependencies = [] # Add project dependencies here, e.g. ["click", "numpy"]
+dependencies = [
+    "fastapi",
+    "numpy",
+    "tiled[all]",
+] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"

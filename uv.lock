@@ -2931,6 +2931,11 @@ wheels = [
 [[package]]
 name = "test-dls-tiled"
 source = { editable = "." }
+dependencies = [
+    { name = "fastapi" },
+    { name = "numpy" },
+    { name = "tiled", extra = ["all"] },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -2948,6 +2953,11 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [
+    { name = "fastapi" },
+    { name = "numpy" },
+    { name = "tiled", extras = ["all"] },
+]
 
 [package.metadata.requires-dev]
 dev = [
