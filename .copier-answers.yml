@@ -1,0 +1,17 @@
+# Changes here will be overwritten by Copier
+_commit: 5.0.2
+_src_path: https://github.com/DiamondLightSource/python-copier-template.git
+author_email: hiran.wijesinghe@diamond.ac.uk
+author_name: Hiran Wijesinghe
+description: A test Tiled container with DLS-specific plugins
+distribution_name: test-dls-tiled
+docker: true
+docker_debug: true
+docs_type: README
+git_platform: github.com
+github_org: hyperrealist
+package_name: test_dls_tiled
+pypi: true
+repo_name: test-dls-tiled
+strict_typing: true
+type_checker: pyright
