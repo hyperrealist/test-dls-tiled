@@ -46,21 +46,48 @@ ENTRYPOINT [ "/bin/bash", "-c", "--" ]
 CMD [ "while true; do sleep 30; done;" ]
 
 
-# The runtime stage copies the built venv into a runtime container
-FROM ubuntu:noble AS runtime
+##########################################################################
+# Production build stage: installs project as non-editable package
 
-# Add apt-get system dependecies for runtime here if needed
-# RUN apt-get update -y && apt-get install -y --no-install-recommends \
-#     some-library \
-#     && apt-get dist-clean
+FROM build AS app_build
 
-# Copy the python installation from the build stage
-COPY --from=build /python /python
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-editable --no-dev
 
-# Copy the environment, but not the source code
-COPY --from=build /app/.venv /app/.venv
-ENV PATH=/app/.venv/bin:$PATH
 
-# change this entrypoint if it is not the same as the repo
-ENTRYPOINT ["test-dls-tiled"]
-CMD ["--version"]
+##########################################################################
+# Production runtime stage: minimal image with only runtime dependencies
+
+FROM ubuntu:noble AS app_runtime
+
+# Ensure logs and error messages do not get stuck in a buffer.
+ENV PYTHONUNBUFFERED=1
+ENV PATH=/app/bin:$PATH
+
+# Don't run your app as root.
+RUN groupadd -r app && \
+    useradd -r -d /app -g app -N app
+
+# Install only runtime dependencies
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Copy the pre-built venv from app_build stage
+COPY --from=app_build --chown=app:app /python /python
+COPY --from=app_build --chown=app:app /app/.venv /app
+
+# Set ownership and create app directory
+RUN mkdir -p /app && chown -r app:app /app
+
+USER app
+WORKDIR /app
+
+# Smoke test that the application can be imported
+RUN python -V && \
+    python -c 'import test_dls_tiled'
+
+EXPOSE 8000
+
+CMD ["tiled", "serve", "config", "--host", "0.0.0.0", "--port", "8000", "--scalable"]
