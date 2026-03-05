@@ -79,8 +79,7 @@ COPY --from=app_build --chown=app:app /python /python
 COPY --from=app_build --chown=app:app /app/.venv /app
 
 # Set ownership and create app directory
-RUN mkdir -p /app && chown -r app:app /app
-
+RUN mkdir -p /app && chown -R app:app /app
 USER app
 WORKDIR /app
 
