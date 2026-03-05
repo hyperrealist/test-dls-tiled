@@ -1,5 +1,8 @@
+from typing import cast
+
 import numpy
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Security
+from tiled.adapters.protocols import ArrayAdapter
 from tiled.server.authentication import (  # type: ignore
     check_scopes,
     get_current_access_tags,
@@ -54,9 +57,16 @@ async def binned(  # type: ignore
         getattr(request.app.state, "access_policy", None),
     )
 
+    # Only allow array-like adapters (must have .read)
+    if not callable(getattr(entry, "read", None)):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Entry at path '{path}' is not array-like and cannot be binned.",
+        )
+    array_entry = cast(ArrayAdapter, entry)
     try:
         with record_timing(request.state.metrics, "read"):
-            data = await ensure_awaitable(entry.read)
+            data = await ensure_awaitable(array_entry.read)  # type: ignore[attr-defined]
     except Exception as e:
         raise HTTPException(
             status_code=500,
