@@ -15,7 +15,7 @@ description = "A test Tiled container with DLS-specific plugins"
 dependencies = [
     "fastapi",
     "numpy",
-    "tiled[all]",
+    "tiled[all]>=0.2.8",
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
@@ -32,7 +32,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "ruff",
-    "tiled[all]",
+    "tiled[all]>=0.2.8",
     "tox-uv",
     "types-mock",
 ]

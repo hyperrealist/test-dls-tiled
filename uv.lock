@@ -2956,7 +2956,7 @@ dev = [
 requires-dist = [
     { name = "fastapi" },
     { name = "numpy" },
-    { name = "tiled", extras = ["all"] },
+    { name = "tiled", extras = ["all"], specifier = ">=0.2.8" },
 ]
 
 [package.metadata.requires-dev]
@@ -2969,7 +2969,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
-    { name = "tiled", extras = ["all"] },
+    { name = "tiled", extras = ["all"], specifier = ">=0.2.8" },
     { name = "tox-uv" },
     { name = "types-mock" },
 ]
@@ -2988,7 +2988,7 @@ wheels = [
 
 [[package]]
 name = "tiled"
-version = "0.2.6"
+version = "0.2.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -3003,9 +3003,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/11/51/2faf69e60aeaa3fe8117408e6df6f44bda5ec07cf60d175a66ea7d8a064d/tiled-0.2.6.tar.gz", hash = "sha256:923e434aac5fb661a0f8c5edfd4ad95329f262a5a09eacd742a873fab50a6048", size = 2503368, upload-time = "2026-02-24T20:12:45.373Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/c1/8db533a61e7f1b62e9bd67f998c29b54abfc2422bafbf518cb8b109c08f7/tiled-0.2.8.tar.gz", hash = "sha256:b3cc7537a19bf086fadb8f97e7467309a06a4fc57bb78ae892a74ed3c37c5a09", size = 2503777, upload-time = "2026-02-27T17:57:53.598Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/48/57a9a12a494a3c4b52af0cb85a7849648b919cc77f92942a56689d73cc18/tiled-0.2.6-py3-none-any.whl", hash = "sha256:35175af121d20f92d67ec3c75fdddf2677c0a539d4a2d8d3e78f7d9a8b9a88a6", size = 1702915, upload-time = "2026-02-24T20:12:42.652Z" },
+    { url = "https://files.pythonhosted.org/packages/a0/a9/c6c646093195a6d3e40661f11b95e753eea2524a1d21d6f9f08e47eca6d4/tiled-0.2.8-py3-none-any.whl", hash = "sha256:faaac4b9aa637339208cb552ac33a0b88b0b21372aec0ffcf10ed30efef6c311", size = 1703255, upload-time = "2026-02-27T17:57:50.018Z" },
 ]
 
 [package.optional-dependencies]
