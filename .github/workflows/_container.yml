@@ -33,7 +33,9 @@ jobs:
 
       - name: Get version from git
         id: version
-        run: echo "version=$(git describe --tags --always)" >> $GITHUB_OUTPUT
+        run: |
+          pip install setuptools_scm --quiet
+          echo "version=$(python -m setuptools_scm)" >> $GITHUB_OUTPUT
 
       - name: Build and export to Docker local cache
         uses: docker/build-push-action@v6
