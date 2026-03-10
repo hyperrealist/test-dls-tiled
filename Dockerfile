@@ -47,29 +47,37 @@ CMD [ "while true; do sleep 30; done;" ]
 
 
 ##########################################################################
-# Production build stage: installs project as non-editable package
-# UV_PROJECT_ENVIRONMENT=/app installs the venv directly into /app,
-# matching the upstream Tiled container approach so /app/bin/tiled exists.
+# Production build stage: clean Python image + fresh uv, no devcontainer baggage
+ARG PYTHON_VERSION=3.12
+FROM python:${PYTHON_VERSION}-slim AS app_build
+ARG PYTHON_VERSION=3.12
 
-FROM developer AS app_build
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# - copy mode avoids hard-link issues in containers
+# - bytecode compilation for faster startup
+# - never download Python (use the base image's interpreter)
+# - point uv at the base image Python
+# - install venv directly at /app (no .venv subdirectory)
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=python${PYTHON_VERSION} \
+    UV_PROJECT_ENVIRONMENT=/app
+
 WORKDIR /src
 COPY . /src
-
-ENV UV_PYTHON_INSTALL_DIR=/python
-ENV UV_PROJECT_ENVIRONMENT=/app
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable --no-dev
 
-
 ##########################################################################
-# Production runtime stage: minimal image with only runtime dependencies
+# Production runtime stage: same slim Python base so venv symlinks resolve
+FROM python:${PYTHON_VERSION}-slim AS app_runtime
+ARG PYTHON_VERSION=3.12
 
-FROM ubuntu:noble AS app_runtime
-
-# Ensure logs and error messages do not get stuck in a buffer.
-ENV PYTHONUNBUFFERED=1
-ENV PATH=/app/bin:/python/bin:$PATH
+# Add the application virtualenv to search path.
+ENV PATH=/app/bin:$PATH
 
 STOPSIGNAL SIGINT
 
@@ -77,26 +85,23 @@ STOPSIGNAL SIGINT
 RUN groupadd -r app && \
     useradd -r -d /app -g app -N app
 
-# Install only runtime dependencies
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Copy the python interpreter and the venv (which IS /app) from the build stage
-COPY --from=app_build --chown=app:app /python /python
-COPY --from=app_build --chown=app:app /app /app
-
-# Create config directory and copy example config
 RUN mkdir -p /deploy/config && chown -R app:app /deploy/config
 COPY example_configs/single_catalog_single_user.yml /deploy/config
 ENV TILED_CONFIG=/deploy/config
 
+# Copy the pre-built venv (which IS /app) from the build stage.
+COPY --from=app_build --chown=app:app /app /app
+
 USER app
 WORKDIR /app
 
-# Smoke test that the application can be imported
+# Smoke test that the application can be imported.
 RUN python -V && \
     python -c 'import test_dls_tiled'
 
@@ -105,6 +110,5 @@ RUN mkdir -p /app/share/tiled && \
 
 EXPOSE 8000
 
-# Clear any entrypoint that may have been inherited and use exec form CMD
 ENTRYPOINT []
 CMD ["tiled", "serve", "config", "--host", "0.0.0.0", "--port", "8000", "--scalable"]
