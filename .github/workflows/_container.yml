@@ -41,8 +41,8 @@ jobs:
           load: true
           tags: tag_for_testing
 
-      # - name: Test cli works in cached runtime image
-      #   run: docker run --rm tag_for_testing --version
+      - name: Test tiled CLI works in built image
+        run: docker run --rm tag_for_testing tiled --version
 
       - name: Create tags for publishing image
         id: meta
@@ -51,8 +51,7 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=tag
-            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
-            type=raw,value=main,enable=${{ github.ref_name == 'main' }}
+            type=raw,value=latest
 
       - name: Push cached image to container registry
         if: inputs.publish

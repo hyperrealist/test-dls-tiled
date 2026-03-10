@@ -105,4 +105,6 @@ RUN mkdir -p /app/share/tiled && \
 
 EXPOSE 8000
 
+# Clear any entrypoint that may have been inherited and use exec form CMD
+ENTRYPOINT []
 CMD ["tiled", "serve", "config", "--host", "0.0.0.0", "--port", "8000", "--scalable"]
