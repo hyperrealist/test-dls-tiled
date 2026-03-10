@@ -90,14 +90,14 @@ RUN mkdir -p /deploy/config && chown -R app:app /deploy/config
 COPY example_configs/single_catalog_single_user.yml /deploy/config
 ENV TILED_CONFIG=/deploy/config
 
-RUN touch /app/.venv/share/tiled/.identifying_file_72628d5f953b4229b58c9f1f8f6a9a09
-
 USER app
 WORKDIR /app
 
 # Smoke test that the application can be imported
 RUN python -V && \
     python -c 'import test_dls_tiled'
+
+RUN touch /app/.venv/share/tiled/.identifying_file_72628d5f953b4229b58c9f1f8f6a9a09
 
 EXPOSE 8000
 
