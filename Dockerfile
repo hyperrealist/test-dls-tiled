@@ -71,6 +71,8 @@ FROM ubuntu:noble AS app_runtime
 ENV PYTHONUNBUFFERED=1
 ENV PATH=/app/bin:/python/bin:$PATH
 
+STOPSIGNAL SIGINT
+
 # Don't run your app as root.
 RUN groupadd -r app && \
     useradd -r -d /app -g app -N app
@@ -78,6 +80,7 @@ RUN groupadd -r app && \
 # Install only runtime dependencies
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     ca-certificates \
+    curl \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -97,7 +100,8 @@ WORKDIR /app
 RUN python -V && \
     python -c 'import test_dls_tiled'
 
-RUN touch /app/.venv/share/tiled/.identifying_file_72628d5f953b4229b58c9f1f8f6a9a09
+RUN mkdir -p /app/share/tiled && \
+    touch /app/share/tiled/.identifying_file_72628d5f953b4229b58c9f1f8f6a9a09
 
 EXPOSE 8000
 
