@@ -1,17 +1,17 @@
-# Minimal Tiled config for single user and single catalog
+# Minimal Tiled config for single user and single catalog.
+# Customise by mounting your own config at /deploy/config/ or setting TILED_CONFIG.
 
 authentication:
   allow_anonymous_access: true
 
-access_control:
-  public:
-    - "*"
+routers:
+  - test_dls_tiled.routers:visr_router
 
-services: {}
+# Add your trees here, e.g.:
+# trees:
+#   - path: /
+#     tree: catalog
+#     args:
+#       uri: "sqlite:////storage/catalog.db"
 
-trees:
-  - path: /
-    tree:
-      type: catalog
-      args:
-        uri: "intake.yaml"
+trees: []

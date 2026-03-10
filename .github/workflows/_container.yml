@@ -51,10 +51,11 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=tag
-            type=raw,value=latest
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
+            type=raw,value=main,enable=${{ github.ref_name == 'main' }}
 
       - name: Push cached image to container registry
-        if: inputs.publish && github.ref_type == 'tag'
+        if: inputs.publish
         uses: docker/build-push-action@v6
         env:
           DOCKER_BUILD_RECORD_UPLOAD: false
