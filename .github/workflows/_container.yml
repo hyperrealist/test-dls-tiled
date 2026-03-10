@@ -31,6 +31,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get version from git
+        id: version
+        run: echo "version=$(git describe --tags --always)" >> $GITHUB_OUTPUT
+
       - name: Build and export to Docker local cache
         uses: docker/build-push-action@v6
         env:
@@ -40,6 +44,8 @@ jobs:
           # Need load and tags so we can test it below
           load: true
           tags: tag_for_testing
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.version }}
 
       - name: Test tiled CLI works in built image
         run: docker run --rm tag_for_testing tiled --version
@@ -65,3 +71,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.version }}

@@ -53,6 +53,11 @@ CMD [ "while true; do sleep 30; done;" ]
 # Production build stage: clean Python image + fresh uv, no devcontainer baggage
 FROM python:${PYTHON_VERSION}-slim AS app_build
 ARG PYTHON_VERSION=3.12
+ARG APP_VERSION=0.0.0
+
+# setuptools_scm can't find git tags inside the build container,
+# so we pass the version in explicitly via a build arg.
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=${APP_VERSION}
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
