@@ -72,10 +72,11 @@ COPY . /src
 # Create the venv explicitly at /app using the base image's Python interpreter.
 RUN uv venv /app --python python${PYTHON_VERSION}
 
-# --active tells uv to use the venv pointed to by VIRTUAL_ENV=/app
-# rather than the project's default .venv location.
+# Sync into the venv we just created.
+# --python /app/bin/python pins uv to that interpreter so it doesn't try
+# to resolve the lock file's original Python version from the search path.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-editable --no-dev --active
+    uv sync --locked --no-editable --no-dev --python /app/bin/python
 
 # Hard verification: fail the build loudly if tiled isn't where we expect it.
 RUN test -f /app/bin/tiled || (echo "ERROR: /app/bin/tiled not found after uv sync" && exit 1)
