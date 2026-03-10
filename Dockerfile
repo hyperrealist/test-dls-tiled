@@ -64,19 +64,14 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
     UV_PYTHON_DOWNLOADS=never \
-    VIRTUAL_ENV=/app
+    UV_PYTHON=python${PYTHON_VERSION} \
+    UV_PROJECT_ENVIRONMENT=/app
 
 WORKDIR /src
 COPY . /src
 
-# Create the venv explicitly at /app using the base image's Python interpreter.
-RUN uv venv /app --python python${PYTHON_VERSION}
-
-# Sync into the venv we just created.
-# --python /app/bin/python pins uv to that interpreter so it doesn't try
-# to resolve the lock file's original Python version from the search path.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-editable --no-dev --python /app/bin/python
+    uv sync --locked --no-editable --no-dev
 
 # Hard verification: fail the build loudly if tiled isn't where we expect it.
 RUN test -f /app/bin/tiled || (echo "ERROR: /app/bin/tiled not found after uv sync" && exit 1)
