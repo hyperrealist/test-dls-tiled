@@ -48,11 +48,15 @@ CMD [ "while true; do sleep 30; done;" ]
 
 ##########################################################################
 # Production build stage: installs project as non-editable package
+# UV_PROJECT_ENVIRONMENT=/app installs the venv directly into /app,
+# matching the upstream Tiled container approach so /app/bin/tiled exists.
 
-FROM build AS app_build
+FROM developer AS app_build
+WORKDIR /src
+COPY . /src
 
-# Explicitly set venv location so we know where to copy it from
-ENV UV_PROJECT_ENVIRONMENT=/app/.venv
+ENV UV_PYTHON_INSTALL_DIR=/python
+ENV UV_PROJECT_ENVIRONMENT=/app
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable --no-dev
@@ -77,9 +81,9 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Copy the python interpreter and pre-built venv into /app so /app/bin/tiled exists
+# Copy the python interpreter and the venv (which IS /app) from the build stage
 COPY --from=app_build --chown=app:app /python /python
-COPY --from=app_build --chown=app:app /app/.venv /app
+COPY --from=app_build --chown=app:app /app /app
 
 # Create config directory and copy example config
 RUN mkdir -p /deploy/config && chown -R app:app /deploy/config
