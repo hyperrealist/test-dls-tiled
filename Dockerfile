@@ -62,7 +62,7 @@ FROM ubuntu:noble AS app_runtime
 
 # Ensure logs and error messages do not get stuck in a buffer.
 ENV PYTHONUNBUFFERED=1
-ENV PATH=/app/bin:$PATH
+ENV PATH=/app/bin:/python/bin:$PATH
 
 # Don't run your app as root.
 RUN groupadd -r app && \
