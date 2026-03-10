@@ -51,6 +51,9 @@ CMD [ "while true; do sleep 30; done;" ]
 
 FROM build AS app_build
 
+# Explicitly set venv location so we know where to copy it from
+ENV UV_PROJECT_ENVIRONMENT=/app/.venv
+
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable --no-dev
 
@@ -74,13 +77,9 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Copy the pre-built venv from app_build stage
+# Copy the python interpreter and pre-built venv into /app so /app/bin/tiled exists
 COPY --from=app_build --chown=app:app /python /python
 COPY --from=app_build --chown=app:app /app/.venv /app
-
-
-# Set ownership and create app directory
-RUN mkdir -p /app && chown -R app:app /app
 
 # Create config directory and copy example config
 RUN mkdir -p /deploy/config && chown -R app:app /deploy/config
