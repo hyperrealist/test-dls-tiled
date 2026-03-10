@@ -63,17 +63,19 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON_DOWNLOADS=never
+    UV_PYTHON_DOWNLOADS=never \
+    VIRTUAL_ENV=/app
 
 WORKDIR /src
 COPY . /src
 
-# Create the venv explicitly at /app, then sync the project into it.
-# Using VIRTUAL_ENV is more reliable than UV_PROJECT_ENVIRONMENT
-# for uv sync in a container build context.
+# Create the venv explicitly at /app using the base image's Python interpreter.
 RUN uv venv /app --python python${PYTHON_VERSION}
+
+# --active tells uv to use the venv pointed to by VIRTUAL_ENV=/app
+# rather than the project's default .venv location.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    VIRTUAL_ENV=/app uv sync --locked --no-editable --no-dev
+    uv sync --locked --no-editable --no-dev --active
 
 # Hard verification: fail the build loudly if tiled isn't where we expect it.
 RUN test -f /app/bin/tiled || (echo "ERROR: /app/bin/tiled not found after uv sync" && exit 1)
