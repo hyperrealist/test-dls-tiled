@@ -61,22 +61,22 @@ ENV SETUPTOOLS_SCM_PRETEND_VERSION=${APP_VERSION}
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# - copy mode avoids hard-link issues in containers
-# - bytecode compilation for faster startup
-# - never download Python (use the base image's interpreter)
-# - point uv at the base image Python
-# - install venv directly at /app (no .venv subdirectory)
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON_DOWNLOADS=never \
-    UV_PYTHON=python${PYTHON_VERSION} \
-    UV_PROJECT_ENVIRONMENT=/app
+    UV_PYTHON_DOWNLOADS=never
 
 WORKDIR /src
 COPY . /src
 
+# Create the venv explicitly at /app, then sync the project into it.
+# Using VIRTUAL_ENV is more reliable than UV_PROJECT_ENVIRONMENT
+# for uv sync in a container build context.
+RUN uv venv /app --python python${PYTHON_VERSION}
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-editable --no-dev
+    VIRTUAL_ENV=/app uv sync --locked --no-editable --no-dev
+
+# Hard verification: fail the build loudly if tiled isn't where we expect it.
+RUN test -f /app/bin/tiled || (echo "ERROR: /app/bin/tiled not found after uv sync" && exit 1)
 
 ##########################################################################
 # Production runtime stage: same slim Python base so venv symlinks resolve
@@ -108,9 +108,8 @@ COPY --from=app_build --chown=app:app /app /app
 USER app
 WORKDIR /app
 
-# Smoke test that the application can be imported.
-RUN python -V && \
-    python -c 'import test_dls_tiled'
+# Smoke test: verify tiled is on PATH and returns the correct version.
+RUN which tiled && tiled --version
 
 RUN mkdir -p /app/share/tiled && \
     touch /app/share/tiled/.identifying_file_72628d5f953b4229b58c9f1f8f6a9a09
