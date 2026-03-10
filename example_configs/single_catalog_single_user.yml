@@ -1,0 +1,17 @@
+# Minimal Tiled config for single user and single catalog
+
+authentication:
+  allow_anonymous_access: true
+
+access_control:
+  public:
+    - "*"
+
+services: {}
+
+trees:
+  - path: /
+    tree:
+      type: catalog
+      args:
+        uri: "intake.yaml"

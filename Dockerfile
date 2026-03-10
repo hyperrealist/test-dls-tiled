@@ -78,8 +78,14 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
 COPY --from=app_build --chown=app:app /python /python
 COPY --from=app_build --chown=app:app /app/.venv /app
 
+
 # Set ownership and create app directory
 RUN mkdir -p /app && chown -R app:app /app
+
+# Create config directory and copy example config
+RUN mkdir -p /deploy/config && chown -R app:app /deploy/config
+COPY example_configs/single_catalog_single_user.yml /deploy/config
+ENV TILED_CONFIG=/deploy/config
 USER app
 WORKDIR /app
 
