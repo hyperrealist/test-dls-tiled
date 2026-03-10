@@ -1,3 +1,6 @@
+# Global ARG must be declared before the first FROM to be available in all FROM instructions.
+ARG PYTHON_VERSION=3.12
+
 # The devcontainer should use the developer target and run as root with podman
 # or docker with user namespaces.
 FROM ghcr.io/diamondlightsource/ubuntu-devcontainer:noble AS developer
@@ -48,7 +51,6 @@ CMD [ "while true; do sleep 30; done;" ]
 
 ##########################################################################
 # Production build stage: clean Python image + fresh uv, no devcontainer baggage
-ARG PYTHON_VERSION=3.12
 FROM python:${PYTHON_VERSION}-slim AS app_build
 ARG PYTHON_VERSION=3.12
 
